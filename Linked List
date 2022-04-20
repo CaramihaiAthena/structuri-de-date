@@ -1,1 +1,196 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <string.h>
+#include <stdbool.h>
+
+typedef struct Employee
+{
+    char* name;
+}Employee;
+
+typedef struct Node
+{
+    Employee* info;
+    struct Node* next;
+}Node;
+
+Employee* createEmployee(char* name);
+Node* createNode(Employee* info);
+
+Node* insertAtBeg(Node* head, Employee* info);
+Node* insertTail(Node* head, Employee* info);
+Node* insertNthPos(Node* head, Employee* info, int pos);
+
+void deleteNthPos(Node* head, Employee* info, int pos);
+void print(Node* head, Employee* info);
+
+int main()
+{
+    FILE* pFile = fopen("Data.txt", "r");
+	Node* list = NULL;
+		
+	char* names[100];       //matricea care contine datele din fisier
+	static short freq[26];  //26 litere ale alfabetului
+	
+	char** agenda[26];      //matrice cu nume alocate dinamic
+	
+	//seteaza toata memoria cu NULL
+	memset(names, 0, 100 * sizeof(char*));
+	memset(agenda, 0, 26 * sizeof(char*));
+	
+	if (pFile) {
+		char buffer[128];
+		int index = 0;
+		
+		fscanf(pFile, "%s", buffer);    //citim din fisier
+		
+		while (!feof(pFile)) //cat timp fisierul este deschis
+		{
+			names[index] = (char*)malloc((strlen(buffer) + 1) * sizeof(char));
+			strcpy(names[index++], buffer);  //se copiaza in buffer fiecare linie in parte
+			
+			int pos = *buffer - 'A';    //pos = A
+			freq[pos]++;
+			fscanf(pFile, "%s", buffer);
+		}
+
+		short temp[26];
+		for (int i = 0; i < 26; i++)
+			temp[i] = freq[i];
+		for (int i = 0; i < 99; i++)
+			if (names[i])
+			{
+				int pos = *names[i] - 'A';
+				if (agenda[pos] == NULL)
+					agenda[pos] = (char**)malloc(freq[pos] * sizeof(char*));
+				agenda[pos][freq[pos] - 1] = (char*)malloc((strlen(names[i]) + 1) * sizeof(char));
+				strcpy(agenda[pos][freq[pos] - 1], names[i]);
+				freq[pos]--;
+			}
+		for (int i = 0; i < 26; i++)
+		{
+			if (agenda[i]) 
+			{
+				printf("Group %c\n", i + 'A');
+				for (int j = 0; j < temp[i]; j++)
+				{
+					printf("Name %s\n", agenda[i][j]);
+
+					//create the Employee* info
+					Employee* emp = createEmployee(agenda[i][j]);
+					//insert the name into the list
+					//insertHead(&list, student);
+					list = insertTail(list, emp);
+
+				}
+			}
+		}
+	}
+}
+
+void print(Node* head, Employee* info)
+{
+    Node* node = head;
+    while(node)
+    {
+        printf("Name: %s \n ", node->info->name);
+        node = node->next;
+    }
+}
+
+void deleteNthPos(Node* head, Employee* info, int pos)
+{
+    Node* temp1 = head;
+    
+    if(pos == 1)
+    {
+        head = temp1->next;
+    }
+    else
+    {
+        for(int i=0; i<pos-2; i++)
+        {
+            temp1 = temp1->next;
+        }
+        Node* temp2 = temp1->next;
+        temp1->next = temp2->next;
+        free(temp2);
+    }
+    if(temp1)
+    {
+        free(temp1->info->name);
+        free(temp1->info);
+        free(temp1);
+    }
+}
+
+Node* insertNthPos(Node* head, Employee* info, int pos)
+{
+    Node* temp1 = createNode(info);
+    Node* temp2 = head;
+    if(pos == 1)
+    {
+        temp1->next = head;
+        head = temp1;
+    }
+    else
+    {
+        for(int i=0; i<pos-2; i++)
+        {
+            temp2 = temp2->next;
+        }
+        temp1->next = temp2->next;
+        temp2->next = temp1;
+    }
+    return head;
+    
+}
+
+Node* insertTail(Node* head, Employee* info)
+{
+    Node* temp1 = createNode(info);
+    Node* temp2 = head;
+    if(head == NULL)
+    {
+        head = temp1;
+    }
+    else
+    {
+        while(temp2->next)
+        {
+            temp2 = temp2->next;
+        }
+        temp2->next = temp1;
+    }
+    return head;
+}
+Node* insertAtBeg(Node* head, Employee* info)
+{
+    Node* node = createNode(info);
+    //connect the node to the structure
+    node->next = head;
+    //connect the structure to the node
+    head = node;
+    return head;
+}
+
+Node* createNode(Employee* info)
+{
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->info = info;
+    node->next = NULL;
+    return node;
+}
+
+Employee* createEmployee(char* name)
+{
+    Employee* emp = (Employee*)malloc(sizeof(Employee));
+    emp->name = (char*)malloc(strlen(name)+1);
+    strcpy(emp->name, name);
+    return emp;
+}
+
+
 
