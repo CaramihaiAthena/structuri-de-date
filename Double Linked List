@@ -1,4 +1,4 @@
-#define CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,78 +21,85 @@ Student* createStudent(int code, char* name);
 Node* createNode(Student* info);
 
 Node* insertAtBeg(Student* info, Node* head);
-void insertTail(Student*info, Node** head);
-Node* insertNthPos(Student*info, Node* head, int pos);
+void insertTail(Student* info, Node** head);
+Node* insertNthPos(Student* info, Node* head, int pos);
 
 Node* deleteAtBeg(Node* head);
 Node* deleteNthPos(Node* head, int pos);
 Node* deleteTail(Node* head);
-Node* delete(Node* head,int pos);
+Node* delete(Node* head, int pos);
 
-void print(Node* head);
+void printStudent(Student* info);
+void print(const Node* head);
+
 
 void main()
 {
 
     Node* list = NULL;
     Student* stud = NULL;
-    
-	FILE* pFile = fopen("Data.txt","r");
-	char lineBuffer[128];
-	
-	char*token;
-	char sep_list[] = ",\n";
 
-	if (pFile)
-	{
-		while (fgets(lineBuffer, sizeof(lineBuffer), pFile))
-		{
-			stud = (Student*)malloc(sizeof(Student));
-			//parsing the code
-			token = strtok(lineBuffer, sep_list);
-			stud->code = atoi(token);
+    FILE* pFile = fopen("Data.txt", "r");
+    char lineBuffer[128];
 
-			//parsing the name
-			token = strtok(NULL, sep_list);
-			stud->name = (char*)malloc(strlen(token) + 1);
-			strcpy(stud->name, token);
-			
-			//insert into the list
-			list = insertAtBeg(stud,list);
-		}
+    char* token;
+    char sep_list[] = ",\n";
 
-		print(list);
+    if (pFile)
+    {
+        while (fgets(lineBuffer, sizeof(lineBuffer), pFile))
+        {
+            stud = (Student*)malloc(sizeof(Student));
+            //parsing the code
+            token = strtok(lineBuffer, sep_list);
+            stud->code = atoi(token);
 
-	}
+            //parsing the name
+            token = strtok(NULL, sep_list);
+            stud->name = (char*)malloc(strlen(token) + 1);
+            strcpy(stud->name, token);
+
+            //insert into the list
+            insertTail(stud, &list);
+        }
+
+        print(list);
+
+    }
+
 }
 
-void print(Node* head)
+void print(const Node* head)
 {
-    Node* temp = head;
-    while(temp)
+    while (head)
     {
-        printf("Code %d - Name %s ", temp->info->code, temp->info->name);
-        temp = temp->next;
+        printStudent(head->info);
+        head = head->next;
     }
     printf("\n");
 }
 
-Node* delete(Node* head,int pos)
+void printStudent(Student* info)
+{
+    printf("Code %d - Name %s \n", info->code, info->name);
+}
+
+Node* delete(Node* head, int pos)
 {
     Node* temp = head;
-    if(pos == 1)
+    if (pos == 1)
     {
         head = deleteAtBeg(head);
     }
-    else if(head->next == NULL)
+    else if (head->next == NULL)
     {
         head = deleteTail(head);
     }
     else
     {
-        head = deleteNthPos(head,pos);
+        head = deleteNthPos(head, pos);
     }
-    if(temp)
+    if (temp)
     {
         free(temp->info->name);
         free(temp->info);
@@ -104,7 +111,7 @@ Node* delete(Node* head,int pos)
 Node* deleteTail(Node* head)
 {
     Node* temp1 = head;
-    while(temp1->next !=NULL)
+    while (temp1->next != NULL)
     {
         temp1 = temp1->next;
     }
@@ -112,13 +119,13 @@ Node* deleteTail(Node* head)
     temp2->next = NULL;
     free(temp1);
     return head;
-    
+
 }
 
 Node* deleteNthPos(Node* head, int pos)
 {
     Node* temp1 = head;
-    for(int i=0; i<pos-2; i++)
+    for (int i = 0; i < pos - 2; i++)
     {
         temp1 = temp1->next;
     }
@@ -128,7 +135,7 @@ Node* deleteNthPos(Node* head, int pos)
     free(temp2);
     temp2 = NULL;
     return head;
-    
+
 }
 
 Node* deleteAtBeg(Node* head)
@@ -138,15 +145,15 @@ Node* deleteAtBeg(Node* head)
     head->prev = NULL;
     free(temp);
     temp = NULL;
-    
+
     return head;
 }
-Node* insertNthPos(Student*info, Node* head, int pos)
+Node* insertNthPos(Student* info, Node* head, int pos)
 {
     Node* temp1 = head;
     Node* node = createNode(info);
-    
-    for(int i=0; i<pos-2;i++)
+
+    for (int i = 0; i < pos - 2; i++)
     {
         temp1 = temp1->next;
     }
@@ -158,12 +165,17 @@ Node* insertNthPos(Student*info, Node* head, int pos)
     return head;
 }
 
-void insertTail(Student*info, Node** head)
+void insertTail(Student* info, Node** head)
 {
     Node* temp = *head;
     Node* node = createNode(info);
-    
-    while(temp->next !=NULL)
+
+    if (temp == NULL)
+    {
+        *head = node;
+        return;
+    }
+    while (temp->next)
     {
         temp = temp->next;
     }
@@ -192,10 +204,7 @@ Student* createStudent(int code, char* name)
 {
     Student* student = (Student*)malloc(sizeof(Student));
     student->code = code;
-    student->name = (char*)malloc(sizeof(strlen(name)+1));
-    strcpy(student->name,name);
+    student->name = (char*)malloc(sizeof(strlen(name) + 1));
+    strcpy(student->name, name);
     return student;
 }
-
-
-
